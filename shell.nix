@@ -2,11 +2,19 @@
 
 pkgs.mkShell {
   buildInputs = [
+    # java
     pkgs.jdk23
     pkgs.gradle
     pkgs.jdt-language-server
     pkgs.vscode-extensions.vscjava.vscode-java-debug
     pkgs.vscode-extensions.vscjava.vscode-java-test
+
+    # javafx
+    pkgs.libglvnd
+    pkgs.xorg.libXxf86vm
+    pkgs.glib.out
+    pkgs.gtk3
+    pkgs.xorg.libXtst
   ];
 
   shellHook = ''
@@ -25,6 +33,9 @@ pkgs.mkShell {
     if [ -z "$(ls -A "$JDTLS_WRITABLE_CONFIG")" ]; then
       cp -r "$JDTLS_HOME/share/java/jdtls/config_linux/"* "$JDTLS_WRITABLE_CONFIG/"
     fi
+
+    # make native libraries available to JavaFX
+    export LD_LIBRARY_PATH="${pkgs.libglvnd}/lib:${pkgs.gtk3}/lib:${pkgs.glib.out}/lib:${pkgs.xorg.libXxf86vm}/lib:${pkgs.xorg.libXtst}/lib:$LD_LIBRARY_PATH"
   '';
 }
 

@@ -10,7 +10,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        name = "java-jdtls-test";
+        name = "sort_visualizer";
       in
       {
         devShells.default = import ./shell.nix {
