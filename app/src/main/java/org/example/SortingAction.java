@@ -1,11 +1,6 @@
 package org.example;
 
-enum ActionType {
-    COMPARE,
-    SWAP,
-    OVERWRITE,
-    MARK_PIVOT
-}
+import org.example.ActionType;
 
 public class SortingAction {
     private ActionType type;
