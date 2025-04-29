@@ -16,7 +16,7 @@ public class App extends Application {
     private static final int WIDTH = 1200;
     private static final int HEIGHT = 600;
     private static final int MAX_BAR_HEIGHT = 400;
-    private static final int GAP = 10;
+    private static final int GAP = 20;
     private int[] testArray = { 1, 4, 2, 6, 8, 3, 3, 4, 5 };
 
     private AnchorPane arrayPane;
@@ -45,12 +45,22 @@ public class App extends Application {
         // listen for next action
         nextButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
+
                 if (!sortingActions.isEmpty()) {
                     SortingAction action = sortingActions.pop();
                     arrayView.executeSortingAction(action, actionText);
-                }else{
-                    actionText.setText("finished sorting");
+
+                    ActionType next = sortingActions.peek().getType();
+                    if (!sortingActions.isEmpty() && (next == ActionType.CLEAR_HIGHLIGHTS
+                            || next == ActionType.MARK_HIGHLIGHT || next == ActionType.UNMARK_PIVOT)) {
+                        System.out.println("skip");
+                        System.out.println(sortingActions.peek().toString());
+                        nextButton.fire();
+                    }
+                } else {
+                    actionText.setText("Finished sorting");
                 }
+
             }
         });
     }
