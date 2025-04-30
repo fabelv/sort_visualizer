@@ -90,9 +90,12 @@ public class App extends Application {
 
     private void populateSortingAlgorithms() {
         ISort quickSort = new QuickSort();
+        ISort bubbleSort = new BubbleSort();
 
         algorithmMap.put("QuickSort", quickSort);
-        algorithmSelector.getItems().addAll("QuickSort");
+        algorithmMap.put("BubbleSort", bubbleSort);
+
+        algorithmSelector.getItems().addAll("QuickSort", "BubbleSort");
     }
 
     private void handleNextAction(ActionEvent e) {
@@ -102,7 +105,8 @@ public class App extends Application {
 
             if (!sortingActions.isEmpty()) {
                 ActionType next = sortingActions.peek().getType();
-                if (next == ActionType.CLEAR_HIGHLIGHTS || next == ActionType.MARK_HIGHLIGHT || next == ActionType.UNMARK_PIVOT) {
+                if (next == ActionType.CLEAR_HIGHLIGHTS || next == ActionType.MARK_HIGHLIGHT
+                        || next == ActionType.UNMARK_PIVOT) {
                     nextButton.fire(); // skip these automatically
                 }
             }
@@ -116,4 +120,3 @@ public class App extends Application {
         launch(args);
     }
 }
-
