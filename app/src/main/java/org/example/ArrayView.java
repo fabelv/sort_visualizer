@@ -5,13 +5,19 @@ import javafx.scene.text.Text;
 
 public class ArrayView {
     private ArrayItem[] items;
+    private int sceneWidth;
+    private int sceneHeight;
+    private int maxBarHeight;
+    private int gap;
 
     public ArrayView(int[] array, int sceneWidth, int sceneHeight, int maxBarHeight, int gap) {
-        items = new ArrayItem[array.length];
-        int max = getMaxValueInArray(array);
-        float scaleHeight = getScaleHeight(maxBarHeight, max);
-        float scaleWidth = getScaleWidth(array, gap, sceneWidth);
-        generateItems(array, sceneHeight, gap, scaleHeight, scaleWidth);
+        this.items = new ArrayItem[array.length];
+        this.sceneWidth = sceneWidth;
+        this.sceneHeight = sceneHeight;
+        this.maxBarHeight = maxBarHeight;
+        this.gap = gap;
+
+        generateItems(array);
     }
 
     // returns true if next step sould be triggered by button
@@ -19,7 +25,6 @@ public class ArrayView {
         ActionType type = action.getType();
         int index1 = action.getIndex1();
         int index2 = action.getIndex2();
-
 
         switch (type) {
             case CLEAR_HIGHLIGHTS:
@@ -68,7 +73,7 @@ public class ArrayView {
         }
     }
 
-   public void drawArrayView(AnchorPane root) {
+    public void drawArrayView(AnchorPane root) {
         for (ArrayItem arrayItem : items) {
             root.getChildren().add(arrayItem.getGroup());
         }
@@ -78,7 +83,11 @@ public class ArrayView {
         return items;
     }
 
-    private void generateItems(int[] array, int sceneHeight, int gap, float scaleHeight, float scaleWidth) {
+    private void generateItems(int[] array) {
+        int max = getMaxValueInArray(array);
+        float scaleHeight = getScaleHeight(maxBarHeight, max);
+        float scaleWidth = getScaleWidth(array, gap, sceneWidth);
+
         for (int i = 0; i < array.length; i++) {
             int h = Math.round(array[i] * scaleHeight);
             int w = (int) scaleWidth;
@@ -103,5 +112,10 @@ public class ArrayView {
         }
         return max;
     }
-}
 
+    public void resetArray(int[] newArray) {
+        items = new ArrayItem[newArray.length];
+        generateItems(newArray);
+    }
+
+}

@@ -2,14 +2,16 @@ package org.example;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class App extends Application {
 
@@ -22,8 +24,11 @@ public class App extends Application {
     private AnchorPane arrayPane;
     private Button nextButton;
     private Text actionText;
+    private ComboBox<String> algorithmSelector;
 
     private ArrayView arrayView;
+    private ArrayList<ISort> sortingAlgorithms = new ArrayList<>();
+    private Map<String, ISort> algorithmMap = new HashMap<>();
     private ArrayDeque<SortingAction> sortingActions;
 
     @Override
@@ -32,7 +37,7 @@ public class App extends Application {
 
         setupArrayPane();
         setupControls();
-        runSortingAlgorithm();
+        populateSortingAlgorithms();
 
         root.setCenter(arrayPane);
         root.setBottom(createFooter());
@@ -42,27 +47,7 @@ public class App extends Application {
         primaryStage.setTitle("Sorting Visualizer");
         primaryStage.show();
 
-        // listen for next action
-        nextButton.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-
-                if (!sortingActions.isEmpty()) {
-                    SortingAction action = sortingActions.pop();
-                    arrayView.executeSortingAction(action, actionText);
-
-                    ActionType next = sortingActions.peek().getType();
-                    if (!sortingActions.isEmpty() && (next == ActionType.CLEAR_HIGHLIGHTS
-                            || next == ActionType.MARK_HIGHLIGHT || next == ActionType.UNMARK_PIVOT)) {
-                        System.out.println("skip");
-                        System.out.println(sortingActions.peek().toString());
-                        nextButton.fire();
-                    }
-                } else {
-                    actionText.setText("Finished sorting");
-                }
-
-            }
-        });
+        nextButton.setOnAction(this::handleNextAction);
     }
 
     private void setupArrayPane() {
@@ -72,40 +57,63 @@ public class App extends Application {
     }
 
     private void setupControls() {
-        nextButton = new Button(">>");
-        actionText = new Text("action");
+        nextButton = new Button("Next");
+        nextButton.setDisable(true);
+        actionText = new Text("Select a sorting algorithm");
+
+        algorithmSelector = new ComboBox<>();
+        algorithmSelector.setPromptText("Choose algorithm");
+
+        algorithmSelector.setOnAction(e -> {
+            String selected = algorithmSelector.getValue();
+            ISort algorithm = algorithmMap.get(selected);
+            if (algorithm != null) {
+                sortingActions = new ArrayDeque<>();
+                int[] arrayCopy = testArray.clone();
+                algorithm.sort(arrayCopy, sortingActions);
+                actionText.setText("Ready to start sorting with " + selected);
+                nextButton.setDisable(false);
+            }
+        });
     }
 
-    private HBox createFooter() {
-        HBox footer = new HBox(10);
+    private VBox createFooter() {
+        HBox controls = new HBox(10);
+        controls.setStyle("-fx-alignment: center;");
+        controls.getChildren().addAll(algorithmSelector, nextButton);
+
+        VBox footer = new VBox(5);
         footer.setStyle("-fx-padding: 10; -fx-alignment: center;");
-        footer.getChildren().addAll(nextButton, actionText);
+        footer.getChildren().addAll(controls, actionText);
         return footer;
     }
 
-    private void runSortingAlgorithm() {
-        sortingActions = new ArrayDeque<SortingAction>();
+    private void populateSortingAlgorithms() {
+        ISort quickSort = new QuickSort();
 
-        System.out.println("Original array:");
-        printArray(testArray);
-
-        QuickSort.quickSort(testArray, 0, testArray.length - 1, sortingActions);
-
-        System.out.println("Sorted array:");
-        printArray(testArray);
-
-        System.out.println("Sorting Actions:");
-        System.out.println(sortingActions);
+        algorithmMap.put("QuickSort", quickSort);
+        algorithmSelector.getItems().addAll("QuickSort");
     }
 
-    private void printArray(int[] array) {
-        for (int value : array) {
-            System.out.print(value + ", ");
+    private void handleNextAction(ActionEvent e) {
+        if (!sortingActions.isEmpty()) {
+            SortingAction action = sortingActions.pop();
+            arrayView.executeSortingAction(action, actionText);
+
+            if (!sortingActions.isEmpty()) {
+                ActionType next = sortingActions.peek().getType();
+                if (next == ActionType.CLEAR_HIGHLIGHTS || next == ActionType.MARK_HIGHLIGHT || next == ActionType.UNMARK_PIVOT) {
+                    nextButton.fire(); // skip these automatically
+                }
+            }
+        } else {
+            actionText.setText("Finished sorting");
+            nextButton.setDisable(true);
         }
-        System.out.println();
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 }
+
